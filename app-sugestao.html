@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Melhoria Escolar - Admin</title>
+    <style>
+        /* Variáveis de Cores */
+        :root {
+            --cor-primaria: #007bff;
+            --cor-secundaria: #0056b3;
+            --cor-fundo-dark: #0a1930;
+            --cor-fundo-light: #152a4e;
+            --cor-texto: #e0f7fa;
+            --cor-card: #152a4e;
+            --cor-borda: #00bcd4;
+            --sombra-futurista: 0 0 10px rgba(0, 188, 212, 0.7);
+            --cor-neon: #00ffcc; 
+        }
+
+        /* Estilo Base e Fundo Dinâmico */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(-45deg, var(--cor-fundo-dark), #00040f, #0a1930, #152a4e);
+            background-size: 400% 400%;
+            animation: gradientAnim 15s ease infinite; 
+            color: var(--cor-texto);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* Animação do Gradiente */
+        @keyframes gradientAnim {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Contêiner Principal do Aplicativo (Aumentado para a Dashboard) */
+        .app-container {
+            width: 100%;
+            max-width: 1000px; 
+            background-color: var(--cor-card);
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), var(--sombra-futurista);
+            padding: 30px;
+            border: 2px solid var(--cor-borda);
+            transition: all 0.3s ease;
+        }
+
+        /* Cabeçalho Principal */
+        h1 {
+            text-align: center;
+            color: var(--cor-borda);
+            margin-bottom: 30px; 
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 1.8em;
+            text-shadow: 0 0 5px var(--cor-borda);
+        }
+        
+        /* Classes de Utilitário para Esconder Telas */
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .screen.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Componentes de Formulário (Mantidos) */
+        .form-group { margin-bottom: 20px; }
+        .row { display: flex; gap: 20px; }
+        .row .form-group { flex: 1; }
+        
+        /* Estilos de Perfil (Mantidos) */
+        .selection-group { margin-bottom: 20px; }
+        .selection-options { display: flex; gap: 10px; justify-content: space-between; margin-top: 5px; }
+        .selection-options input[type="radio"] { display: none; }
+        .selection-options label { flex: 1; padding: 10px 5px; background-color: rgba(255, 255, 255, 0.05); border: 1px solid var(--cor-primaria); border-radius: 8px; text-align: center; cursor: pointer; transition: background-color 0.2s, border-color 0.2s, color 0.2s; font-weight: normal; font-size: 0.9em; margin: 0; display: block; }
+        .selection-options input[type="radio"]:checked + label { background-color: var(--cor-borda); border-color: var(--cor-borda); color: var(--cor-card); box-shadow: 0 0 8px rgba(0, 188, 212, 0.5); }
+        .selection-options label:hover { background-color: rgba(0, 188, 212, 0.2); border-color: var(--cor-borda); }
+
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: var(--cor-texto); font-size: 0.9em; }
+        
+        /* Estilização para Inputs e SELECTs (Mantidos) */
+        input[type="text"], input[type="email"], input[type="password"], select, textarea { width: 100%; padding: 12px; background-color: rgba(255, 255, 255, 0.05); border: 1px solid var(--cor-primaria); border-radius: 8px; color: var(--cor-texto); font-size: 1em; transition: border-color 0.3s, box-shadow 0.3s; box-sizing: border-box; -webkit-appearance: none; -moz-appearance: none; appearance: none; }
+        
+        /* Estilizando SELECT normal (fora da tabela) */
+        select { 
+             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><path fill="%2300BCD4" d="M7 10l5 5 5-5z"/></svg>'); 
+             background-repeat: no-repeat; 
+             background-position: right 10px center; 
+             padding-right: 30px; 
+        }
+        
+        select option { color: #000; background-color: #fff; }
+        input:focus, select:focus, textarea:focus { border-color: var(--cor-borda); box-shadow: var(--sombra-futurista); outline: none; }
+        
+        /* Botões Padrão (Mantidos) */
+        button { width: 100%; padding: 15px; background-color: var(--cor-primaria); color: white; border: none; border-radius: 8px; font-size: 1.1em; font-weight: bold; cursor: pointer; transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s; text-transform: uppercase; letter-spacing: 1px; margin-top: 10px; }
+        button:hover:not(:disabled) { background-color: var(--cor-secundaria); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4); }
+        .switch-link { display: block; text-align: center; margin-top: 20px; font-size: 0.9em; color: var(--cor-borda); cursor: pointer; text-decoration: none; transition: color 0.3s; }
+        .forgot-password-link { margin-top: 5px; font-size: 0.8em; text-align: right; text-decoration: underline; }
+
+        .error-message, .loading-message, #feedback-message { margin-top: 20px; padding: 15px; border-radius: 8px; text-align: center; font-weight: bold; display: none; }
+        .error-message { color: white; background-color: #ff6347; }
+        .loading-message { color: white; background-color: #ffc107; }
+        #feedback-message { background-color: #28a745; box-shadow: 0 0 10px rgba(40, 167, 69, 0.5); }
+        
+        /* Estilos de Simulação de Código */
+        #feedback-message h1 { 
+            font-size: 2em; 
+            color: #ffeb3b; 
+            margin: 10px 0 0; 
+            text-shadow: 0 0 5px #000; 
+            padding: 5px;
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 5px;
+        }
+
+        /* Anonimato (Mantidos os estilos) */
+        .toggle-container { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 25px; 
+            padding: 10px; 
+            background-color: rgba(255, 255, 255, 0.03); 
+            border-radius: 8px; 
+            border: 1px solid rgba(0, 188, 212, 0.3); 
+        }
+        .toggle-switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--cor-borda); }
+        input:checked + .slider:before { transform: translateX(26px); }
+
+        .toggle-label {
+            font-size: 0.9em;
+            font-weight: normal;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        /* --- ESTILOS ESPECÍFICOS DO PAINEL ADMIN E LISTA PÚBLICA --- */
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 188, 212, 0.3);
+        }
+        .admin-header h2 {
+            margin: 0;
+            color: var(--cor-texto);
+            font-size: 1.2em;
+        }
+        .admin-header button {
+            width: auto;
+            padding: 8px 15px;
+            font-size: 0.9em;
+            background-color: #dc3545; /* Vermelho para Sair */
+        }
+        .admin-header button:hover {
+            background-color: #c82333;
+        }
+        
+        /* Estilo para o Subtítulo (NEON) */
+        .admin-subtitle {
+            text-align: center;
+            margin-top: 15px; 
+            margin-bottom: 25px;
+            padding: 10px;
+            background-color: #05101a; 
+            border-radius: 8px;
+            font-size: 0.95em;
+            color: var(--cor-neon); 
+            text-shadow: 0 0 5px var(--cor-neon), 0 0 10px rgba(0, 255, 204, 0.5); 
+            font-weight: normal; 
+            border: 1px solid rgba(0, 255, 204, 0.5); 
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.3); 
+            display: block !important; 
+            z-index: 99; 
+            animation: pulseNeon 1.5s infinite alternate; 
+        }
+        
+        /* Animação de Pulsação Neon */
+        @keyframes pulseNeon {
+            from {
+                text-shadow: 0 0 5px var(--cor-neon), 0 0 10px rgba(0, 255, 204, 0.5);
+                box-shadow: 0 0 8px rgba(0, 255, 204, 0.3);
+            }
+            to {
+                text-shadow: 0 0 10px var(--cor-neon), 0 0 20px rgba(0, 255, 204, 0.8);
+                box-shadow: 0 0 15px rgba(0, 255, 204, 0.5);
+            }
+        }
+
+        /* Estilo da Tabela de Sugestões */
+        .suggestion-table-container {
+            max-height: 400px; 
+            overflow-y: auto;
+            border: 1px solid var(--cor-borda);
+            border-radius: 10px;
+        }
+        #suggestions-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85em;
+        }
+        #suggestions-table th, #suggestions-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 188, 212, 0.1);
+        }
+        #suggestions-table th {
+            background-color: rgba(0, 188, 212, 0.2);
+            color: var(--cor-borda);
+            position: sticky;
+            top: 0; 
+            z-index: 10;
+        }
+        #suggestions-table tr:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+        #suggestions-table tr:hover {
+            background-color: rgba(0, 188, 212, 0.1);
+        }
+        .no-suggestions {
+            text-align: center;
+            padding: 20px;
+            color: #ffc107;
+            font-weight: bold;
+        }
+
+        /* Centraliza colunas ID e Status/Ação */
+        #suggestions-table tbody tr td:first-child, 
+        #suggestions-table thead tr th:first-child,
+        #suggestions-table tbody tr td:last-child,
+        #suggestions-table thead tr th:last-child {
+            text-align: center;
+        }
+        
+        /* Ajuste do cabeçalho Ação/Status para incluir o botão de Excluir */
+        #suggestions-table thead tr th:nth-last-child(2) { /* Status */
+            text-align: center; 
+        }
+        #suggestions-table tbody tr td:nth-last-child(2) { /* Status */
+             text-align: center; 
+        }
+
+
+        /* ------------------------------------------- */
+        /* ESTILOS PARA O STATUS SELECT */
+        /* ------------------------------------------- */
+        .status-select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: none !important; 
+            padding: 5px 8px;
+            border-radius: 5px;
+            font-size: 0.85em;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s; 
+            width: 100px; 
+            box-sizing: border-box;
+            text-align: center; 
+            display: block; 
+            margin: 0 auto 5px auto; 
+        }
+        
+        /* Cores de Fundo do Status */
+        .status-select.status-nova { background-color: #ffc107; color: #152a4e; } 
+        .status-select.status-em-analise { background-color: #6c757d; color: white; } 
+        .status-select.status-concluida { background-color: #28a745; color: white; } 
+        .status-select.status-nao-foi-possivel-realiza-la { background-color: #dc3545; color: white; } 
+
+        /* Estilos para o Modal */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 20; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.8); 
+        }
+        .modal-content {
+            background-color: var(--cor-card);
+            margin: 15% auto; 
+            padding: 20px;
+            border: 1px solid var(--cor-borda);
+            border-radius: 10px;
+            width: 80%; 
+            max-width: 600px;
+            box-shadow: var(--sombra-futurista);
+        }
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close-btn:hover, .close-btn:focus {
+            color: var(--cor-borda);
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .modal-details p {
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            color: #ddd;
+        }
+        .modal-details h3 {
+            color: var(--cor-neon);
+            border-bottom: 1px solid rgba(0, 255, 204, 0.3);
+            padding-bottom: 5px;
+        }
+        
+        /* Botões Específicos da Tabela */
+        .table-btn {
+            width: 100%;
+            padding: 5px;
+            font-size: 0.8em;
+            margin-top: 5px;
+            border-radius: 5px;
+            background-color: var(--cor-primaria);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .table-btn.view {
+            background-color: var(--cor-borda);
+        }
+        .table-btn.delete {
+            background-color: #dc3545; /* Vermelho */
+        }
+        .table-btn:hover {
+             filter: brightness(1.2);
+        }
+        /* Icones de Publico/Privado */
+        .status-badge {
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 5px;
+            font-size: 0.75em;
+            display: inline-block;
+        }
+        .badge-public {
+            background-color: #00bcd4;
+            color: #152a4e;
+        }
+        .badge-private {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        /* --- ESTILOS DA LISTA PÚBLICA (SCREEN 7) --- */
+        #public-suggestions-list {
+            list-style: none;
+            padding: 0;
+            max-height: 450px;
+            overflow-y: auto;
+        }
+        .public-suggestion-item {
+            background-color: rgba(0, 188, 212, 0.1);
+            border: 1px solid var(--cor-borda);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 0 5px rgba(0, 188, 212, 0.3);
+            transition: transform 0.2s;
+        }
+        .public-suggestion-item:hover {
+            transform: translateY(-2px);
+        }
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            padding-bottom: 5px;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+        }
+        .item-header strong {
+            color: var(--cor-neon);
+            font-size: 1.1em;
+        }
+        .item-status {
+            font-size: 0.8em;
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        .status-nova-public { background-color: #ffc107; color: #152a4e; }
+        .status-em-analise-public { background-color: #6c757d; color: white; } 
+        .status-concluida-public { background-color: #28a745; color: white; } 
+        .status-nao-foi-possivel-realiza-la-public { background-color: #dc3545; color: white; } 
+
+        .item-body {
+            font-size: 0.9em;
+            line-height: 1.4;
+            color: var(--cor-texto);
+        }
+        .item-footer {
+            font-size: 0.75em;
+            opacity: 0.7;
+            margin-top: 10px;
+            text-align: right;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <h1 id="main-title">Login</h1>
+        
+        <p class="error-message" id="global-error"></p>
+        <p class="loading-message" id="global-loading">Processando...</p>
+
+        <div class="screen active" id="login-screen">
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-email">Email:</label>
+                    <input type="email" id="login-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Senha:</label>
+                    <input type="password" id="login-password" required placeholder="********">
+                    <a href="#" class="switch-link forgot-password-link" data-target="forgot-password-screen">
+                        Esqueci a Senha
+                    </a>
+                </div>
+                <button type="submit" id="login-btn">Entrar</button>
+            </form>
+            <a href="#" class="switch-link" data-target="register-screen">
+                Não tem conta? Cadastre-se
+            </a>
+            <a href="#" class="switch-link" data-target="suggestion-screen">
+                Continuar sem Login (Anônimo)
+            </a>
+        </div>
+
+        <div class="screen" id="register-screen">
+            <form id="register-form">
+                <div class="form-group">
+                    <label for="register-name">Nome Completo:</label>
+                    <input type="text" id="register-name" required>
+                </div>
+                 <div class="form-group">
+                    <label for="register-email">Email:</label>
+                    <input type="email" id="register-email" required>
+                </div>
+
+                <div class="selection-group">
+                    <label>Você é:</label>
+                    <div class="selection-options">
+                        <input type="radio" id="role-aluno" name="register-role" value="student" required>
+                        <label for="role-aluno">Aluno</label>
+
+                        <input type="radio" id="role-professor" name="register-role" value="teacher">
+                        <label for="role-professor">Professor</label>
+                        
+                        <input type="radio" id="role-visitante" name="register-role" value="visitor">
+                        <label for="role-visitante">Visitante</label>
+                        </div>
+                </div>
+                
+                 <div class="form-group">
+                    <label for="register-idade">Idade:</label>
+                    <select id="register-idade" required>
+                        <option value="" disabled selected>Selecione sua idade</option>
+                        </select>
+                </div>
+                <div id="student-info-group">
+                    <div class="row">
+                        <div class="form-group">
+                            <label for="register-serie">Série:</label>
+                            <select id="register-serie" required>
+                                <option value="" disabled selected>Escolha</option>
+                                <option value="1">1ª Série</option>
+                                <option value="2">2ª Série</option>
+                                <option value="3">3ª Série</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="register-turma">Turma:</label>
+                            <select id="register-turma" required>
+                                <option value="" disabled selected>Escolha</option>
+                                <option value="A">Turma A</option>
+                                <option value="B">Turma B</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div id="teacher-info-group" style="display: none;">
+                    <div class="form-group">
+                        <label for="register-materia">Matéria que Leciona:</label>
+                        <input type="text" id="register-materia" placeholder="Ex: Matemática, História" disabled>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Senha:</label>
+                    <input type="password" id="register-password" required placeholder="Mínimo 6 caracteres">
+                </div>
+                <button type="submit" id="register-btn">Cadastrar</button>
+            </form>
+            <a href="#" class="switch-link" data-target="login-screen">
+                Já tem conta? Fazer Login
+            </a>
+        </div>
+
+        <div class="screen" id="suggestion-screen">
+            <p id="user-status" style="font-size: 0.9em; text-align: center; margin-bottom: 20px; color: var(--cor-borda);">Status: Anônimo</p>
+            
+            <p class="admin-subtitle">
+                Este espaço foi criado pelos alunos do 1º ano B da Escola Ceti Martinheiro para reunir ideias que ajudem no aprimoramento da nossa escola.
+            </p>
+
+            <form id="suggestion-form">
+                
+                <div id="visibility-option">
+                    <div class="toggle-container">
+                        <div>
+                            <span class="toggle-label">Tornar sugestão pública?</span>
+                            <span style="font-size: 0.75em; opacity: 0.7;">(Visível para outros usuários no app)</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggle-publica" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="sugestao">Sua Sugestão de Melhoria:</label>
+                    <textarea id="sugestao" name="sugestao" placeholder="Descreva sua ideia em detalhes. Ex: 'Sugiro pintar a quadra e colocar cestas novas.'" required></textarea>
+                </div>
+
+                <button type="submit" id="suggestion-btn">Enviar Sugestão</button>
+            </form>
+            
+            <button class="switch-link" style="width:100%; padding: 10px; background-color: var(--cor-neon); color: var(--cor-card); font-size: 1em; margin-top: 15px;" data-target="public-suggestions-screen">
+                Ver Sugestões Públicas (Inspire-se!)
+            </button>
+            
+            <a href="#" class="switch-link" data-target="login-screen">
+                Voltar para Login
+            </a>
+        </div>
+        
+        <div class="screen" id="public-suggestions-screen">
+             <div class="admin-header">
+                <h2>📢 Sugestões Públicas</h2>
+                <button class="switch-link" style="width: auto; margin-top: 0; padding: 8px 15px; font-size: 0.9em; background-color: #28a745;" data-target="suggestion-screen">
+                    &larr; Enviar Sugestão
+                </button>
+            </div>
+            <p class="admin-subtitle">
+                Veja as ideias de melhoria compartilhadas pela comunidade da escola e acompanhe seu status!
+            </p>
+
+            <ul id="public-suggestions-list">
+                </ul>
+            <p id="no-public-suggestions-message" class="no-suggestions" style="display: none; color: var(--cor-neon);">
+                Nenhuma sugestão pública enviada ainda. Seja o primeiro!
+            </p>
+        </div>
+
+
+        <div class="screen" id="forgot-password-screen">
+            <h2>Recuperar Senha</h2>
+            <form id="request-reset-form">
+                <p style="font-size: 0.9em; margin-bottom: 15px;">Informe seu email para receber o código de recuperação (simulado).</p>
+                <div class="form-group">
+                    <label for="reset-email">Email Cadastrado:</label>
+                    <input type="email" id="reset-email" required>
+                </div>
+                <button type="submit" id="request-reset-btn">Enviar Código</button>
+            </form>
+            <a href="#" class="switch-link" data-target="login-screen">
+                &larr; Voltar para o Login
+            </a>
+        </div>
+
+        <div class="screen" id="reset-password-screen">
+            <h2>Redefinir Senha</h2>
+            <form id="reset-password-form">
+                <p id="reset-info" style="font-size: 0.9em; margin-bottom: 15px; color: #ffc107;">Código enviado para [EMAIL_DO_USUARIO]</p>
+
+                <div class="form-group">
+                    <label for="reset-code">Código de Verificação (6 dígitos):</label>
+                    <input type="text" id="reset-code" required placeholder="XXXXXX" maxlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="new-password">Nova Senha:</label>
+                    <input type="password" id="new-password" required placeholder="Mínimo 6 caracteres">
+                </div>
+                <button type="submit" id="reset-password-btn">Redefinir e Entrar</button>
+            </form>
+            <a href="#" class="switch-link" data-target="login-screen">
+                &larr; Voltar para o Login
+            </a>
+        </div>
+
+
+        <div class="screen" id="admin-dashboard">
+            <div class="admin-header">
+                <h2>📊 Painel de Sugestões</h2>
+                <button id="logout-btn">Sair</button>
+            </div>
+            
+            <p class="admin-subtitle">
+                Este espaço foi criado pelos alunos do 1º ano B da Escola Ceti Martin Pinheiro para reunir ideias que ajudem no aprimoramento da nossa escola.
+            </p>
+
+            <div class="suggestion-table-container">
+                <table id="suggestions-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Sugestão (Início)</th> 
+                            <th>Autor (Perfil)</th>
+                            <th>Info. Adicional</th>
+                            <th>Data</th>
+                            <th>Publicidade</th> 
+                            <th>Status</th>
+                            <th>Ações</th> 
+                        </tr>
+                    </thead>
+                    <tbody id="suggestions-table-body">
+                        </tbody >
+                </table>
+                <p id="no-suggestions-message" class="no-suggestions" style="display: none;">Nenhuma sugestão enviada ainda.</p>
+            </div>
+            
+        </div>
+        
+        <div id="feedback-message"></div>
+    </div>
+    
+    <div id="suggestion-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <div class="modal-details">
+                <h3>Detalhes da Sugestão #<span id="modal-id"></span></h3>
+                <p><strong>Autor:</strong> <span id="modal-autor"></span></p>
+                <p><strong>Perfil:</strong> <span id="modal-perfil"></span></p>
+                <p><strong>Status:</strong> <span id="modal-status"></span></p>
+                <p><strong>Publicidade:</strong> <span id="modal-publica"></span></p>
+                <p><strong>Data de Envio:</strong> <span id="modal-data"></span></p>
+                <hr style="border-color: rgba(0, 188, 212, 0.3);">
+                <p><strong>Sugestão Completa:</strong></p>
+                <p id="modal-sugestao" style="white-space: pre-wrap; color: var(--cor-texto);"></p>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // --- CHAVES DO LOCALSTORAGE ---
+        const USERS_KEY = 'appMelhoriaUsers';
+        const SUGGESTIONS_KEY = 'appMelhoriaSuggestions';
+
+        // --- CREDENCIAIS ADMIN ---
+        const ADMIN_EMAIL = 'cetimartinpinheiro@escola.edu';
+        const ADMIN_PASSWORD = '26112025a';
+        
+        let currentUser = null; 
+        
+        // --- Variável para o fluxo de redefinição de senha ---
+        let passwordReset = {
+            email: null,
+            code: null,
+            targetUser: null
+        };
+        
+        // 1. FUNÇÃO DE CARREGAMENTO INICIAL
+        function loadData() {
+            const savedUsers = localStorage.getItem(USERS_KEY);
+            const savedSuggestions = localStorage.getItem(SUGGESTIONS_KEY);
+            
+            const defaultAdmin = { 
+                email: ADMIN_EMAIL, 
+                password: ADMIN_PASSWORD, 
+                name: 'Ceti Martinheiro (Admin)', 
+                role: 'admin', 
+                idade: 'N/A', 
+                serie: 'N/A', 
+                turma: 'N/A',
+                materia: 'N/A' // NOVO: Campo Matéria
+            };
+            
+            let loadedUsers = savedUsers ? JSON.parse(savedUsers) : [];
+            
+            loadedUsers = loadedUsers.filter(u => u.email !== ADMIN_EMAIL);
+            loadedUsers.unshift(defaultAdmin); 
+
+            return {
+                users: loadedUsers,
+                suggestions: savedSuggestions ? JSON.parse(savedSuggestions) : []
+            };
+        }
+        
+        const loadedData = loadData();
+        let usersDB = loadedData.users; 
+        let suggestionsDB = loadedData.suggestions; 
+
+        // 2. FUNÇÕES DE SALVAMENTO
+        function saveUsers() {
+            const usersToSave = usersDB.filter(u => u.role !== 'admin');
+            localStorage.setItem(USERS_KEY, JSON.stringify(usersToSave));
+        }
+        function saveSuggestions() {
+            localStorage.setItem(SUGGESTIONS_KEY, JSON.stringify(suggestionsDB));
+        }
+
+        // Elementos DOM
+        const globalError = document.getElementById('global-error');
+        const globalLoading = document.getElementById('global-loading');
+        const feedbackMessage = document.getElementById('feedback-message');
+        const registerForm = document.getElementById('register-form');
+        const registerBtn = document.getElementById('register-btn');
+        const suggestionsTableBody = document.getElementById('suggestions-table-body');
+        const noSuggestionsMessage = document.getElementById('no-suggestions-message');
+        const logoutBtn = document.getElementById('logout-btn');
+        const requestResetForm = document.getElementById('request-reset-form');
+        const resetPasswordForm = document.getElementById('reset-password-form');
+        const resetInfo = document.getElementById('reset-info');
+        const sugestaoInput = document.getElementById('sugestao');
+        const togglePublica = document.getElementById('toggle-publica'); 
+        const publicSuggestionsList = document.getElementById('public-suggestions-list');
+        const noPublicSuggestionsMessage = document.getElementById('no-public-suggestions-message');
+        
+        const suggestionModal = document.getElementById('suggestion-modal');
+        const closeBtn = document.querySelector('.close-btn');
+
+        // FUNÇÃO DE IDADE (Mantida)
+        function populateAgeDropdown(minAge, maxAge) {
+            const select = document.getElementById('register-idade');
+            for (let i = minAge; i <= maxAge; i++) {
+                const option = document.createElement('option');
+                option.value = i.toString(); 
+                option.textContent = i + ' anos';
+                select.appendChild(option);
+            }
+            const option30plus = document.createElement('option');
+            option30plus.value = '30+'; 
+            option30plus.textContent = '30 anos ou mais';
+            select.appendChild(option30plus);
+        }
+        populateAgeDropdown(10, 29); 
+        
+        // --- NOVO: LÓGICA DE VISIBILIDADE DE CAMPOS DE CADASTRO ---
+        document.querySelectorAll('input[name="register-role"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const role = this.value;
+                const studentGroup = document.getElementById('student-info-group');
+                const teacherGroup = document.getElementById('teacher-info-group');
+                const registerMateria = document.getElementById('register-materia');
+                const registerSerie = document.getElementById('register-serie');
+                const registerTurma = document.getElementById('register-turma');
+                
+                // Esconder e desabilitar tudo por padrão (exceto idade)
+                studentGroup.style.display = 'none';
+                teacherGroup.style.display = 'none';
+                registerMateria.disabled = true;
+                
+                // Remove required (para que apenas os campos visíveis sejam exigidos)
+                registerMateria.removeAttribute('required');
+                registerSerie.removeAttribute('required');
+                registerTurma.removeAttribute('required');
+
+                if (role === 'student') {
+                    studentGroup.style.display = 'block';
+                    registerSerie.setAttribute('required', 'required');
+                    registerTurma.setAttribute('required', 'required');
+                } else if (role === 'teacher') {
+                    teacherGroup.style.display = 'block';
+                    registerMateria.disabled = false;
+                    registerMateria.setAttribute('required', 'required');
+                } 
+                // Se for 'visitor', tudo fica escondido (apenas Nome, Email, Idade e Senha permanecem)
+            });
+        });
+        // --- FIM NOVO: LÓGICA DE VISIBILIDADE DE CAMPOS DE CADASTRO ---
+
+        // Função para mostrar feedback (Mantida)
+        function showFeedback(element, message, duration = 3000) {
+            element.innerHTML = message;
+            element.style.display = 'block';
+            setTimeout(() => {
+                element.style.display = 'none';
+                element.innerHTML = ''; // Limpa o conteúdo
+            }, duration);
+        }
+        
+        // ----------------- FUNÇÃO DE EXCLUSÃO (Admin) -----------------
+        function deleteSuggestion(suggestionId) {
+            if (confirm(`Tem certeza de que deseja EXCLUIR a sugestão #${suggestionId}? Esta ação é irreversível.`)) {
+                const initialLength = suggestionsDB.length;
+                suggestionsDB = suggestionsDB.filter(sug => sug.id !== parseInt(suggestionId));
+                
+                if (suggestionsDB.length < initialLength) {
+                    saveSuggestions();
+                    renderSuggestionsTable(); 
+                    showFeedback(feedbackMessage, `Sugestão #${suggestionId} excluída com sucesso!`, 2000);
+                } else {
+                     showFeedback(globalError, `Erro ao excluir sugestão #${suggestionId}. Não encontrada.`, 3000);
+                }
+            }
+        }
+        window.deleteSuggestion = deleteSuggestion; 
+        
+        // ----------------- FUNÇÃO DE VISUALIZAÇÃO DE DETALHES (Admin) -----------------
+        function viewSuggestionDetails(suggestionId) {
+            const sug = suggestionsDB.find(s => s.id === parseInt(suggestionId));
+            if (!sug) return;
+
+            let perfilDisplay = sug.perfil === 'student' ? 'Aluno' : 
+                                sug.perfil === 'teacher' ? 'Professor' : 
+                                sug.perfil === 'visitor' ? 'Visitante' : 'N/A (Anônimo)'; // NOVO: Visitante
+            let autorDisplay = sug.anonimo ? sug.autor : `${sug.autor} (${sug.autorID})`;
+            let publicaDisplay = sug.isPublic ? 'Pública (Visível a todos)' : 'Privada (Visível apenas ao Admin)';
+            
+            // Lógica para info adicional no Modal
+            let additionalInfo = '';
+            if (sug.perfil === 'student' && sug.serie && sug.serie !== 'N/A') {
+                additionalInfo = `<p><strong>Série/Turma:</strong> ${sug.serie}ª / ${sug.turma}</p>`;
+            } else if (sug.perfil === 'teacher' && sug.materia && sug.materia !== 'N/A') { // NOVO: Matéria
+                additionalInfo = `<p><strong>Matéria:</strong> ${sug.materia}</p>`;
+            }
+            if (sug.idade && sug.idade !== 'N/A') {
+                additionalInfo += `<p><strong>Idade:</strong> ${sug.idade}</p>`;
+            }
+            
+            // Remove infos adicionais antigas para evitar duplicidade
+            const modalDetailsEl = document.querySelector('#suggestion-modal .modal-details');
+            modalDetailsEl.querySelectorAll('.modal-additional-info').forEach(el => el.remove());
+
+            if (additionalInfo) {
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'modal-additional-info';
+                infoDiv.innerHTML = `<hr style="border-color: rgba(0, 188, 212, 0.3);">` + additionalInfo + `<hr style="border-color: rgba(0, 188, 212, 0.3);">`;
+                // Insere antes do título "Sugestão Completa"
+                document.getElementById('modal-sugestao').parentElement.insertBefore(infoDiv, document.getElementById('modal-sugestao').previousElementSibling);
+            }
+
+            document.getElementById('modal-id').textContent = sug.id;
+            document.getElementById('modal-autor').textContent = autorDisplay;
+            document.getElementById('modal-perfil').textContent = perfilDisplay;
+            document.getElementById('modal-status').textContent = sug.status;
+            document.getElementById('modal-publica').textContent = publicaDisplay;
+            document.getElementById('modal-data').textContent = sug.dataEnvio;
+            document.getElementById('modal-sugestao').textContent = sug.sugestao;
+            
+            suggestionModal.style.display = 'block';
+        }
+        window.viewSuggestionDetails = viewSuggestionDetails; 
+
+        // Fechar Modal
+        closeBtn.onclick = function() {
+            suggestionModal.style.display = 'none';
+        }
+        window.onclick = function(event) {
+            if (event.target == suggestionModal) {
+                suggestionModal.style.display = 'none';
+            }
+        }
+
+        // ----------------- FUNÇÃO DE ATUALIZAÇÃO DE STATUS (Admin) -----------------
+        function updateSuggestionStatus(selectElement, suggestionId, newStatus) {
+            const index = suggestionsDB.findIndex(sug => sug.id === parseInt(suggestionId));
+            if (index !== -1) {
+                suggestionsDB[index].status = newStatus;
+                saveSuggestions();
+                // Atualiza a classe do próprio <select> para que a cor seja refletida
+                const cssClass = newStatus.toLowerCase().replace(/ /g, '-').replace(/á/g, 'a').replace(/ó/g, 'o');
+                selectElement.className = `status-select status-${cssClass}`;
+                showFeedback(feedbackMessage, `Status da Sugestão #${suggestionId} atualizado para **${newStatus}**!`, 1500);
+            }
+        }
+        window.updateSuggestionStatus = updateSuggestionStatus; 
+        
+        // ----------------- RENDERIZA A TABELA DE SUGESTÕES (Admin) -----------------
+        function renderSuggestionsTable() {
+            suggestionsTableBody.innerHTML = ''; 
+            
+            if (suggestionsDB.length === 0) {
+                noSuggestionsMessage.style.display = 'block';
+                return;
+            } else {
+                noSuggestionsMessage.style.display = 'none';
+            }
+
+            suggestionsDB.forEach(sug => {
+                const tr = document.createElement('tr');
+
+                let perfilDisplay = sug.perfil === 'student' ? 'Aluno' : 
+                                    sug.perfil === 'teacher' ? 'Professor' : 
+                                    sug.perfil === 'visitor' ? 'Visitante' : 'N/A'; // NOVO: Visitante
+                
+                let infoDisplay = 'N/A';
+                
+                // Info adicional é exibida se o usuário NÃO foi anônimo (i.e., estava logado)
+                if (!sug.anonimo) { 
+                    if (sug.perfil === 'student' && sug.serie !== 'N/A' && sug.turma !== 'N/A') {
+                        infoDisplay = `Série: ${sug.serie}ª Turma: ${sug.turma} | Idade: ${sug.idade}`;
+                    } else if (sug.perfil === 'teacher' && sug.materia !== 'N/A') { // NOVO: Matéria
+                        infoDisplay = `Matéria: ${sug.materia} | Idade: ${sug.idade}`;
+                    } else if (sug.perfil === 'visitor') { // NOVO: Visitante
+                        infoDisplay = `Idade: ${sug.idade}`;
+                    } else {
+                         infoDisplay = `Idade: ${sug.idade}`; // Fallback para logados sem dados específicos (e.g., admin)
+                    }
+                } 
+
+                let autorNome = sug.anonimo ? 'Anônimo' : sug.autor;
+                let autorPerfil = sug.perfil !== 'N/A' ? `(${perfilDisplay})` : '';
+                
+                const sugestaoCurta = sug.sugestao.substring(0, 50) + (sug.sugestao.length > 50 ? '...' : '');
+
+                // Publicidade Badge
+                const publicidadeBadge = sug.isPublic 
+                    ? `<span class="status-badge badge-public">Pública</span>`
+                    : `<span class="status-badge badge-private">Privada</span>`;
+
+                // Mapeia o status inicial para a classe CSS
+                const initialCssClass = sug.status.toLowerCase().replace(/ /g, '-').replace(/á/g, 'a').replace(/ó/g, 'o');
+
+                // Gera o Dropdown de Status
+                const statusSelectHTML = `
+                    <select class="status-select status-${initialCssClass}" 
+                            data-id="${sug.id}" 
+                            onchange="updateSuggestionStatus(this, this.dataset.id, this.value);">
+                        <option value="Nova" ${sug.status === 'Nova' ? 'selected' : ''}>Nova</option>
+                        <option value="Em Análise" ${sug.status === 'Em Análise' ? 'selected' : ''}>Em Análise</option>
+                        <option value="Concluída" ${sug.status === 'Concluída' ? 'selected' : ''}>Concluída</option>
+                        <option value="Não Foi Possível Realizá-la" ${sug.status === 'Não Foi Possível Realizá-la' ? 'selected' : ''}>Não Foi Possível Realizá-la</option>
+                    </select>
+                `;
+
+                // Botões de Ação
+                const actionButtons = `
+                    <button class="table-btn view" onclick="viewSuggestionDetails(${sug.id})">Ver Detalhes</button>
+                    <button class="table-btn delete" onclick="deleteSuggestion(${sug.id})">Excluir</button>
+                `;
+
+                tr.innerHTML = `
+                    <td>${sug.id}</td>
+                    <td>${sugestaoCurta}</td>
+                    <td>${autorNome} <span style="font-size:0.8em;opacity:0.5;">${autorPerfil}</span></td>
+                    <td>${infoDisplay}</td>
+                    <td>${sug.dataEnvio.split(',')[0]}</td>
+                    <td style="text-align: center;">${publicidadeBadge}</td>
+                    <td>${statusSelectHTML}</td>
+                    <td style="text-align: center;">${actionButtons}</td>
+                `;
+                suggestionsTableBody.appendChild(tr);
+            });
+        }
+        // --------------------------------------------------------------------------
+
+        // ----------------- RENDERIZA A LISTA DE SUGESTÕES PÚBLICAS -----------------
+        function renderPublicSuggestions() {
+            publicSuggestionsList.innerHTML = '';
+            
+            // Filtra apenas as sugestões marcadas como públicas
+            const publicSuggestions = suggestionsDB.filter(sug => sug.isPublic);
+
+            if (publicSuggestions.length === 0) {
+                noPublicSuggestionsMessage.style.display = 'block';
+                return;
+            } else {
+                noPublicSuggestionsMessage.style.display = 'none';
+            }
+
+            publicSuggestions.forEach(sug => {
+                const li = document.createElement('li');
+                li.className = 'public-suggestion-item';
+
+                // Mapeia o status para a classe CSS pública
+                const statusClass = sug.status.toLowerCase().replace(/ /g, '-').replace(/á/g, 'a').replace(/ó/g, 'o') + '-public';
+
+                li.innerHTML = `
+                    <div class="item-header">
+                        <strong>#${sug.id} ${sug.titulo}</strong>
+                        <span class="item-status ${statusClass}">${sug.status}</span>
+                    </div>
+                    <div class="item-body">
+                        ${sug.sugestao}
+                    </div>
+                    <div class="item-footer">
+                        Enviado em: ${sug.dataEnvio.split(',')[0]} | Autor: ${sug.anonimo ? 'Anônimo' : 'Identificado'}
+                    </div>
+                `;
+                publicSuggestionsList.appendChild(li);
+            });
+        }
+        // --------------------------------------------------------------------------
+
+
+        // ----------------- Funções Auxiliares de Tela (Mantida) -----------------
+        function switchScreen(targetId) {
+            const screens = document.querySelectorAll('.screen');
+            const mainTitle = document.getElementById('main-title');
+            
+            screens.forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(targetId).classList.add('active');
+            globalError.style.display = 'none';
+
+            const appContainer = document.querySelector('.app-container');
+            if (targetId === 'admin-dashboard') {
+                appContainer.style.maxWidth = '1200px'; 
+            } else {
+                appContainer.style.maxWidth = '400px';
+            }
+            
+            if (targetId === 'login-screen') {
+                mainTitle.textContent = 'Login';
+                currentUser = null; 
+            } else if (targetId === 'register-screen') {
+                mainTitle.textContent = 'Cadastro';
+            } else if (targetId === 'suggestion-screen') {
+                mainTitle.textContent = 'Enviar Sugestão';
+                updateUserStatus();
+            } else if (targetId === 'admin-dashboard') {
+                mainTitle.textContent = 'Administração';
+                renderSuggestionsTable(); 
+            } else if (targetId === 'public-suggestions-screen') { // NOVO HANDLER
+                mainTitle.textContent = 'Sugestões Públicas';
+                renderPublicSuggestions(); 
+                appContainer.style.maxWidth = '600px'; // Ajusta tamanho da tela pública
+            } else if (targetId === 'forgot-password-screen') {
+                mainTitle.textContent = 'Recuperação';
+            } else if (targetId === 'reset-password-screen') {
+                mainTitle.textContent = 'Redefinir Senha';
+            }
+        }
+        
+        // FUNÇÃO DE ATUALIZAÇÃO DE STATUS - SIMPLIFICADA
+        function updateUserStatus() {
+            const statusElement = document.getElementById('user-status');
+            const isLogged = currentUser && currentUser.name && currentUser.role !== 'admin';
+
+            if (isLogged) {
+                let roleDisplay = currentUser.role === 'student' ? 'Aluno' : 
+                                  currentUser.role === 'teacher' ? 'Professor' : 'Visitante'; // NOVO: Visitante
+                statusElement.innerHTML = `Status: Logado como <b>${currentUser.name} (${roleDisplay})</b>. Sua sugestão será identificada.`;
+            } else {
+                statusElement.innerHTML = 'Status: Anônimo. Sua sugestão será enviada anonimamente.';
+            }
+            // Garante que a visibilidade pública seja o padrão
+            togglePublica.checked = true; 
+        }
+
+        // ----------------- Lógica de Login (Mantida) -----------------
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+
+            const user = usersDB.find(u => u.email === email && u.password === password);
+
+            if (user) {
+                currentUser = user;
+                if (user.role === 'admin') {
+                    showFeedback(feedbackMessage, `Bem-vindo(a), Admin!`, 1000);
+                    switchScreen('admin-dashboard'); 
+                } else {
+                    showFeedback(feedbackMessage, `Bem-vindo(a), ${user.name}!`, 1000);
+                    switchScreen('suggestion-screen');
+                }
+            } else {
+                currentUser = null;
+                showFeedback(globalError, 'Email ou senha incorretos.', 3000);
+            }
+        });
+
+        // ----------------- Lógica de Solicitação de Reset (Mantida) -----------------
+        requestResetForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const resetEmail = document.getElementById('reset-email').value;
+            const user = usersDB.find(u => u.email === resetEmail);
+            
+            if (!user) {
+                showFeedback(globalError, 'Este email não está cadastrado.', 3000);
+                return;
+            }
+            
+            const recoveryCode = Math.floor(100000 + Math.random() * 900000).toString();
+            
+            passwordReset.email = resetEmail;
+            passwordReset.code = recoveryCode;
+            passwordReset.targetUser = user;
+            
+            const feedbackHTML = `
+                ✅ Sucesso! Código de recuperação (simulado) para <b>${resetEmail}</b>.
+                <p>Use o código abaixo para redefinir sua senha.</p>
+                <h1>${recoveryCode}</h1>
+            `;
+            showFeedback(feedbackMessage, feedbackHTML, 10000); 
+            
+            console.log(`[SIMULAÇÃO] Código de Recuperação (VISÍVEL NO TOPO DA PÁGINA) para ${resetEmail}: ${recoveryCode}`);
+            
+            resetInfo.textContent = `Código (simulado) enviado para: ${resetEmail}`;
+            
+            setTimeout(() => {
+                switchScreen('reset-password-screen');
+                document.getElementById('reset-code').value = ''; 
+                document.getElementById('new-password').value = ''; 
+            }, 1000);
+        });
+        
+        // ----------------- Lógica de Redefinição de Senha (Mantida) -----------------
+        resetPasswordForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const enteredCode = document.getElementById('reset-code').value;
+            const newPassword = document.getElementById('new-password').value;
+            
+            if (newPassword.length < 6) {
+                showFeedback(globalError, 'A nova senha deve ter no mínimo 6 caracteres.', 3000);
+                return;
+            }
+            
+            if (enteredCode !== passwordReset.code) {
+                showFeedback(globalError, 'Código de verificação incorreto ou expirado.', 3000);
+                return;
+            }
+            
+            const userIndex = usersDB.findIndex(u => u.email === passwordReset.email);
+
+            if (userIndex === -1) {
+                 showFeedback(globalError, 'Erro interno. Usuário não encontrado.', 3000);
+                 return;
+            }
+
+            usersDB[userIndex].password = newPassword;
+            
+            if (usersDB[userIndex].role !== 'admin') {
+                saveUsers();
+            } 
+            
+            passwordReset.email = null;
+            passwordReset.code = null;
+            passwordReset.targetUser = null;
+
+            showFeedback(feedbackMessage, 'Senha redefinida com sucesso! Redirecionando para Login...', 2000);
+            
+            setTimeout(() => {
+                switchScreen('login-screen');
+            }, 2500);
+        });
+
+        // ----------------- Lógica de Cadastro (Atualizada) -----------------
+        
+        registerForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            globalError.style.display = 'none';
+            
+            const name = document.getElementById('register-name').value.trim();
+            const email = document.getElementById('register-email').value.trim();
+            const role = document.querySelector('input[name="register-role"]:checked')?.value;
+            const idade = document.getElementById('register-idade').value; 
+            const password = document.getElementById('register-password').value;
+            
+            // Inicializa campos condicionais como N/A
+            let serie = 'N/A';
+            let turma = 'N/A';
+            let materia = 'N/A'; // NOVO: Matéria
+            
+            if (!role || !idade || name === '' || email === '' || password === '') {
+                 showFeedback(globalError, 'Por favor, preencha todos os campos obrigatórios (Nome, Email, Senha, Perfil e Idade).');
+                 return;
+            }
+
+            if (role === 'student') {
+                serie = document.getElementById('register-serie').value;
+                turma = document.getElementById('register-turma').value;
+                if (!serie || !turma) {
+                    showFeedback(globalError, 'Por favor, preencha a Série e Turma.');
+                    return;
+                }
+            } else if (role === 'teacher') {
+                materia = document.getElementById('register-materia').value.trim();
+                if (!materia) {
+                    showFeedback(globalError, 'Por favor, preencha a Matéria que Leciona.');
+                    return;
+                }
+            } 
+            // Para 'visitor', serie, turma e materia permanecem 'N/A' (apenas idade é capturada)
+
+            registerBtn.disabled = true;
+            showFeedback(globalLoading, 'Enviando dados de cadastro...', 5000);
+
+            setTimeout(() => {
+                registerBtn.disabled = false;
+                globalLoading.style.display = 'none';
+
+                if (usersDB.some(u => u.email === email)) {
+                    showFeedback(globalError, 'Erro: Este email já está cadastrado no sistema.');
+                    return;
+                }
+
+                const newUser = { email, password, name, role, idade, serie, turma, materia }; // NOVO: Adiciona 'materia'
+                usersDB.push(newUser);
+                currentUser = newUser;
+                
+                saveUsers(); 
+                
+                showFeedback(feedbackMessage, `Sucesso! Cadastro de ${name} (${role}) efetuado. Redirecionando...`);
+                
+                setTimeout(() => {
+                    registerForm.reset();
+                    switchScreen('suggestion-screen');
+                }, 1500);
+
+            }, 2000); 
+        });
+
+        // ----------------- Lógica de Envio de Sugestão (Atualizada) -----------------
+        document.getElementById('suggestion-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // Anonimato é determinado pelo status de login
+            const isAnonymous = currentUser === null; 
+            const isPublic = togglePublica.checked; 
+            const sugestao = sugestaoInput.value; 
+            
+            let autorNome;
+            let perfil;
+            let autorID;
+            let serie = 'N/A';
+            let turma = 'N/A';
+            let idade = 'N/A'; 
+            let materia = 'N/A'; // NOVO: Matéria
+
+            if (currentUser === null) {
+                // Se não está logado, é sempre anônimo
+                autorNome = "Anônimo";
+                perfil = 'N/A';
+                autorID = 'N/A';
+            } else {
+                // Se está logado, usa os dados do usuário
+                autorNome = currentUser.name;
+                perfil = currentUser.role;
+                autorID = currentUser.email;
+                serie = currentUser.serie || 'N/A';
+                turma = currentUser.turma || 'N/A';
+                idade = currentUser.idade || 'N/A';
+                materia = currentUser.materia || 'N/A'; // NOVO: Matéria
+            }
+            
+            const data = {
+                id: suggestionsDB.length > 0 ? Math.max(...suggestionsDB.map(s => s.id)) + 1 : 1, 
+                titulo: sugestao.substring(0, 50) + (sugestao.length > 50 ? '...' : ''), 
+                sugestao: sugestao,
+                autor: autorNome,
+                anonimo: isAnonymous, 
+                autorID: autorID, 
+                perfil: perfil,
+                isPublic: isPublic, 
+                // Informações adicionais salvas
+                serie: serie,
+                turma: turma,
+                idade: idade, 
+                materia: materia, // NOVO: Matéria
+                dataEnvio: new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                status: 'Nova' 
+            };
+            
+            suggestionsDB.push(data);
+            saveSuggestions();
+            
+            console.log("SUGESTÃO ENVIADA (Admin View):", data);
+
+            showFeedback(feedbackMessage, `Sugestão enviada com sucesso! ${isPublic ? 'Ela está marcada como PÚBLICA.' : 'Ela está marcada como PRIVADA.'}`, 5000);
+            
+            document.getElementById('suggestion-form').reset();
+            updateUserStatus(); // Restaura o estado inicial (publico=true)
+        });
+        
+        // ----------------- Lógica de Navegação e Logout (Mantida) -----------------
+        document.querySelectorAll('.switch-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetScreen = link.getAttribute('data-target');
+                if (targetScreen === 'suggestion-screen' && link.textContent.includes('Anônimo')) {
+                    currentUser = null;
+                }
+                switchScreen(targetScreen);
+            });
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            switchScreen('login-screen');
+        });
+
+        // Inicializa o aplicativo na tela de Login
+        switchScreen('login-screen');
+    </script>
+</body>
+</html>
